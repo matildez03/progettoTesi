@@ -15,8 +15,11 @@ from data_preprocessing import preprocess_data
 from eda import (
     plot_popularity_distribution, plot_duration_vs_popularity, plot_loudness_vs_popularity, 
     plot_danceability_vs_popularity, plot_speechiness_vs_popularity, plot_tempo_vs_popularity, 
-    plot_instrumentalness_vs_popularity, plot_correlation_matrix
+    plot_instrumentalness_vs_popularity, plot_correlation_matrix, hist_dataframe,
+    plot_danceability_violin, plot_energy_vs_valence, plot_feature_heatmap, plot_radar_chart
 )
+from sklearn.preprocessing import MinMaxScaler
+
 
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
@@ -60,19 +63,53 @@ if __name__ == "__main__":
     # 3 - EDA
     print("\nAnalisi esplorativa dei dati...")
     
+    #Istogrammi delle features musicali
+    hist_dataframe(df_train)
+    
     # Distribuzione della popolarità
     plot_popularity_distribution(df_train)
 
-    # Analizziamo le feature musicali rispetto alla popolarità
+    # Analizzo le feature musicali rispetto alla popolarità
     plot_duration_vs_popularity(df_train)
     plot_loudness_vs_popularity(df_train)
     plot_danceability_vs_popularity(df_train)
     plot_speechiness_vs_popularity(df_train)
     plot_tempo_vs_popularity(df_train)
     plot_instrumentalness_vs_popularity(df_train)
+    plot_danceability_violin(df_train)
+    plot_energy_vs_valence(df_train)
 
     # Matrice di correlazione tra le feature
     plot_correlation_matrix(df_train)
+    
+    # Heatmap delle features musicali più presenti in ogni classe di popolarità
+    plot_feature_heatmap(df_train)
+    
+    # Grafico radiale delle features per ogni classe di popolarità
+    plot_radar_chart(df_train)
+    
+    # 4 - SCALING
+    # Separo feature e target
+    X_train = df_train[['feature']]
+    y_train = df_train['target']
+    X_test = df_test[['feature']]
+    y_test = df_test['target']
+
+    # Creo lo scaler, fittato solo sui dati di training 
+    scaler = MinMaxScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+
+    # Trasformo il test set con lo stesso scaler (senza rifare il fit)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # 5 - TRAINING AND CROSS VALIDATION
+    
+        
+    
+    
+    
+    
+    
     
     
     
