@@ -52,7 +52,7 @@ def preprocess_data(file_path):
     # CREAZIONE DELLA VARIABILE TARGET
     
     # Creo 5 categorie bilanciate usando i quantili
-    df_cleaned['popularity_class'] = pd.qcut(df_cleaned['popularity'], q=5, labels=[1, 2, 3, 4, 5])
+    df_cleaned['popularity_class'] = pd.qcut(df_cleaned['popularity'], q=4, labels=[1, 2, 3, 4])
     
     # Stampa il numero di istanze in ogni classe
     print(df_cleaned['popularity_class'].value_counts())
