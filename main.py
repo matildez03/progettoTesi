@@ -9,6 +9,7 @@ Created on Sun Feb 16 11:25:00 2025
 import pandas as pd
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from data_preprocessing import preprocess_data
@@ -22,6 +23,10 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+
 
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
@@ -109,26 +114,60 @@ if __name__ == "__main__":
     # 5 - TRAINING AND CROSS VALIDATION
     print("\nInizio training...")
     
-    #random forest
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_model.fit(X_train, y_train)
+    # Cross Validation function
+    def evaluate_model(model, X_train, y_train):
+        scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+        return np.mean(scores), np.std(scores)
+
+    # Addestriamo un modello preliminare per valutare l'importanza delle feature
+    rf_temp = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_temp.fit(X_train, y_train)
+
+    # Selezioniamo le feature più importanti
+    feature_importance = pd.Series(rf_temp.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+    selected_features = feature_importance[:8].index.tolist()  # Prendiamo le prime 8 feature più importanti
+    X_selected = X_train[selected_features]
+
+    print(f"Feature selezionate dopo feature importance: {selected_features}")
+    
+    # Random Forest con GridSearchCV
+    param_grid_rf = {
+    'n_estimators': [100, 300, 500],  # Aumentiamo il numero di alberi
+    'max_depth': [10, 20, 30],  # Proviamo alberi più profondi
+    'min_samples_split': [2, 5, 10]
+    }
+    rf_grid = GridSearchCV(RandomForestClassifier(random_state=42), param_grid_rf, cv=3, n_jobs=-1)
+    rf_grid.fit(X_train, y_train)
+    rf_model = rf_grid.best_estimator_
     y_pred_rf = rf_model.predict(X_test)
     print("\nRandom Forest:")
     print(f"Accuracy: {accuracy_score(y_test, y_pred_rf):.4f}")
     print(classification_report(y_test, y_pred_rf))
 
-    # Gradient Boosting
-    gb_model = GradientBoostingClassifier(n_estimators=100, random_state=42)
-    gb_model.fit(X_train, y_train)
+    # Gradient Boosting con GridSearchCV
+    param_grid_gb = {
+    'n_estimators': [100, 300],
+    'learning_rate': [0.01, 0.1, 0.2],  # Aggiungiamo un learning rate più aggressivo
+    'max_depth': [3, 5, 7]  # Testiamo alberi più profondi
+    }
+    gb_grid = GridSearchCV(GradientBoostingClassifier(random_state=42), param_grid_gb, cv=3, n_jobs=-1)
+    gb_grid.fit(X_train, y_train)
+    gb_model = gb_grid.best_estimator_
     y_pred_gb = gb_model.predict(X_test)
     print("\nGradient Boosting:")
     print(f"Accuracy: {accuracy_score(y_test, y_pred_gb):.4f}")
     print(classification_report(y_test, y_pred_gb))
 
-    # Support Vector Machine
-    svm_model = SVC(kernel='rbf', C=1, gamma='scale')
-    svm_model.fit(X_train, y_train)
-    y_pred_svm = svm_model.predict(X_test)
-    print("\nSVM:")
-    print(f"Accuracy: {accuracy_score(y_test, y_pred_svm):.4f}")
-    print(classification_report(y_test, y_pred_svm))
+    #    Support Vector Machine con GridSearchCV
+    param_grid_svm = {
+        'C': [0.1, 1, 10],
+        'gamma': ['scale', 'auto'],
+        'kernel': ['rbf', 'linear']
+    }
+    # svm_grid = GridSearchCV(SVC(), param_grid_svm, cv=3, n_jobs=-1)
+    # svm_grid.fit(X_train, y_train)
+    # svm_model = svm_grid.best_estimator_
+    # y_pred_svm = svm_model.predict(X_test)
+    # print("\nSVM:")
+    # print(f"Accuracy: {accuracy_score(y_test, y_pred_svm):.4f}")
+    # print(classification_report(y_test, y_pred_svm))
