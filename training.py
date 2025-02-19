@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
 
-# Caricamento del dataset originale
+# Caricamento del dataset pulito
 df = pd.read_csv('spotify_dataset_cleaned.csv')
 
 # Selezioniamo un sottoinsieme del dataset per ridurre le dimensioni (es. il 30% dei dati)
@@ -47,6 +47,12 @@ def train_and_tune_model(model, param_grid, X_train, y_train, X_valid, y_valid, 
     # Valutazione sul validation set
     y_pred_valid = best_model.predict(X_valid)
     accuracy = accuracy_score(y_valid, y_pred_valid)
+    
+    # Se il modello è RandomForestClassifier, calcola l'importanza delle feature
+    if isinstance(model, RandomForestClassifier):
+        feature_importance = pd.Series(best_model.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+        selected_features = feature_importance[:8].index.tolist()  # Prendiamo le prime 8 feature più importanti
+        print(f"Feature selezionate dopo feature importance: {selected_features}")
 
     print(f"\n{model_name} Best Params: {best_params}")
     print(f"{model_name} Accuracy on Validation Set: {accuracy:.4f}")
