@@ -38,25 +38,29 @@ if __name__ == "__main__":
 
     # 1 - CLEANING AND PREPROCESSING
     df = preprocess_data(file_path)
+    
+    # 1.1 - QUICK LOOK AT THE DATA STRUCTURE
 
-    # Visualizza le prime righe del dataset pulito
-    print("\nDal main:")
+    print("\n")
     print("Prime righe del df pulito:")
     print(df.head())
 
     print("\nInformazioni sul dataset")
     print("\n", df.info())
+    
+    print("\nStatistiche descrittive sul dataset:")
+    print("\n", df.describe())
 
-    # Controlliamo la distribuzione
-    print("Numero di valori per ciascuna classe target:")
+    # Controllo e visualizzazione della distribuzione delle classi target
+    print("\nNumero di valori per ciascuna classe target:")
     print(df['popularity_class'].value_counts())
 
-    # Visualizziamo la distribuzione dopo la suddivisione
     df['popularity_class'].value_counts().sort_index().plot(kind='bar')
     plt.xlabel('Classi di Popolarità')
     plt.ylabel('Numero di brani')
     plt.title('Distribuzione delle Classi di Popolarità')
     plt.show()
+    print("")
 
     # 2 - DIVISIONE IN TRAINING E TEST SET
     # Divisione 80% training, 20% test
@@ -66,9 +70,15 @@ if __name__ == "__main__":
     # Controllo delle dimensioni
     print(f"Dimensione Training Set: {df_train.shape[0]} entries")
     print(f"Dimensione Test Set: {df_test.shape[0]} entries")
+    print("")
+    
+    # Separo feature e target
+    features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness', 'instrumentalness']
+    target = 'popularity_class'
 
     # 3 - EDA
     print("\nAnalisi esplorativa dei dati...")
+    print(df_train.info())
 
     # Istogrammi delle features musicali
     hist_dataframe(df_train)
@@ -84,21 +94,20 @@ if __name__ == "__main__":
     plot_tempo_vs_popularity(df_train)
     plot_instrumentalness_vs_popularity(df_train)
     plot_danceability_violin(df_train)
+    
     plot_energy_vs_valence(df_train)
 
     # Matrice di correlazione tra le feature
-    plot_correlation_matrix(df_train)
+    plot_correlation_matrix(df_train[features])
 
     # Heatmap delle features musicali più presenti in ogni classe di popolarità
-    plot_feature_heatmap(df_train)
+    #plot_feature_heatmap(df_train[features])
 
     # Grafico radiale delle features per ogni classe di popolarità
     plot_radar_chart(df_train)
 
     # 4 - SCALING
-    # Separo feature e target
-    features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness', 'instrumentalness']
-    target = 'popularity_class'
+    
     X_train = df_train[features]
     y_train = df_train[target]
     X_test = df_test[features]

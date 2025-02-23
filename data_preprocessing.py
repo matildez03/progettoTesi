@@ -18,8 +18,8 @@ pd.set_option('display.expand_frame_repr', False)  # Evita che le colonne vadano
 
 def preprocess_data(file_path):
     """
-    Carica e pre-elabora il dataset di Spotify, rimuovendo dati mancanti e duplicati,
-    creando la variabile target della popolarità suddivisa in 5 classi.
+    Carica e pre-elabora il dataset, rimuovendo dati mancanti e duplicati,
+    creando la variabile target della popolarità suddivisa in 4 classi.
     
     Args:
         file_path (str): Percorso del file CSV da caricare.
@@ -30,28 +30,35 @@ def preprocess_data(file_path):
     
     # Carico il dataset
     df = pd.read_csv(file_path)
-    
+    print("Prime righe del dataset:")
     print(df.head())
+    
+    print("Informazioni sul dataset:")
     print(df.info())
+    
+    print("\nStatistiche descrittive sul dataset:")
+    print("\n", df.describe())
+    
+    #distribuzione di popolarità
+    df["popularity"].hist()
+    plt.show()
 
     # CLEANING 
     df.dropna(inplace=True)
     df.columns = df.columns.str.strip()  # Rimuove spazi dai nomi delle colonne
-
-        
-    # Rimozione colonne non utili per la classificazione basata su dati musicali
-    df.drop(columns=['Unnamed: 0','track_name', 'artists', 'album_name', 'track_genre'], inplace=True)
-
-        
+    
     # Rimozione di duplicati
     df_cleaned = df.sort_values(by="popularity", ascending=False).drop_duplicates(subset="track_id", keep="first")
+    
+    # Rimozione colonne non utili per la classificazione basata su dati musicali
+    df_cleaned.drop(columns=['Unnamed: 0','track_name', 'artists', 'album_name', 'track_genre'], inplace=True)
 
     # Converte explicit in numerico 
     df_cleaned['explicit'] = df_cleaned['explicit'].astype(int)
 
+
     # CREAZIONE DELLA VARIABILE TARGET
-    
-    # Creo 5 categorie bilanciate usando i quantili
+    # Creo 4 categorie bilanciate usando i quartili
     df_cleaned['popularity_class'] = pd.qcut(df_cleaned['popularity'], q=4, labels=[1, 2, 3, 4])
     
     # Stampa il numero di istanze in ogni classe
