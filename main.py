@@ -73,7 +73,7 @@ if __name__ == "__main__":
     print("")
     
     # Separo feature e target
-    features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness', 'instrumentalness']
+    features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness']
     target = 'popularity_class'
 
     # 3 - EDA
@@ -82,6 +82,10 @@ if __name__ == "__main__":
 
     # Istogrammi delle features musicali
     hist_dataframe(df_train)
+    
+    df_train["duration_ms"].hist()
+    print(df_train["duration_ms"].head())
+    print(df_train["duration_ms"].mean())
 
     # Distribuzione della popolarità
     plot_popularity_distribution(df_train)
@@ -97,22 +101,64 @@ if __name__ == "__main__":
     
     plot_energy_vs_valence(df_train)
 
-    # Matrice di correlazione tra le feature
-    plot_correlation_matrix(df_train[features])
+    # Matrice di correlazione tra le features e la popolarità
+    plot_correlation_matrix(df_train)
 
     # Heatmap delle features musicali più presenti in ogni classe di popolarità
-    #plot_feature_heatmap(df_train[features])
+    plot_feature_heatmap(df_train)
 
     # Grafico radiale delle features per ogni classe di popolarità
     plot_radar_chart(df_train)
-
-    # 4 - SCALING
     
+    # 4 - FEATURE ENGINEERING
+    
+    # 4 - FEATURE ENGINEERING (Applicato sia a df_train che a df_test)
+    for df in [df_train, df_test]:
+        df["energy_loudness"] = df["energy"] * df["loudness"]
+        df["loudness_valence"] = df["loudness"] * df["valence"]
+        df["danceability_energy"] = df["danceability"] * df["energy"]
+        df["acousticness_speechiness"] = df["acousticness"] * df["speechiness"]
+        df["instr_speech_ratio"] = df["instrumentalness"] / (df["speechiness"] + 1e-5)
+        df["duration_per_bpm"] = df["duration_ms"] / (df["tempo"] + 1e-5)
+        df["vocal_intensity"] = df["loudness"] * df["speechiness"]
+        df["energy_danceability_ratio"] = df["energy"] / (df["danceability"] + 1e-5)
+
+    # 5 - SCALING (Dopo aver aggiunto le nuove feature)
+    features = [
+    'duration_ms', 'explicit', 'speechiness', 'instrumentalness', 
+    'energy', 'danceability', 'valence', 'acousticness',
+    'energy_loudness', 'loudness_valence', 'danceability_energy', 'acousticness_speechiness',
+    'instr_speech_ratio', 'duration_per_bpm', 'vocal_intensity', 'energy_danceability_ratio'
+    ]
+
+    # Separo X e y per il training e test set
     X_train = df_train[features]
     y_train = df_train[target]
     X_test = df_test[features]
     y_test = df_test[target]
 
+    print("Valori NaN in df_train:")
+    print(df_train.isna().sum())
+
+    print("Valori infiniti in df_train:")
+    print(np.isinf(df_train.select_dtypes(include=[np.number])).sum())
+
+    
+    # Converti gli infiniti in NaN
+    df_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Sostituisci i NaN con la media della colonna (o un valore fisso)
+    df_train.fillna(df_train.select_dtypes(include=[np.number]).mean(), inplace=True)
+    df_test.fillna(df_test.select_dtypes(include=[np.number]).mean(), inplace=True)
+    
+    print("Valori NaN in df_train:")
+    print(df_train.isna().sum())
+
+    print("Valori infiniti in df_train:")
+    print(np.isinf(df_train.select_dtypes(include=[np.number])).sum())
+
+    
     # Creo lo scaler, fittato solo sui dati di training
     scaler = MinMaxScaler()
     X_train_scaled = scaler.fit_transform(X_train)
