@@ -25,12 +25,15 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
+from feature_engineering import feature_engineering
+from hyperparameter_tuning import optimize_hyperparameters
+from lightgbm import LGBMClassifier
+
 
 
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
-# Evita che le colonne vadano a capo
-pd.set_option('display.expand_frame_repr', False)
+pd.set_option('display.expand_frame_repr', False) # Evita che le colonne vadano a capo
 
 if __name__ == "__main__":
     file_path = "spotify_dataset_2022.csv"
@@ -40,20 +43,24 @@ if __name__ == "__main__":
     
     # 1.1 - QUICK LOOK AT THE DATA STRUCTURE
 
+    print("\nFile: main.py")
     print("\n")
     print("Prime righe del df pulito:")
     print(df.head())
 
-    print("\nInformazioni sul dataset")
+    print("\nInformazioni sul dataset pulito")
     print("\n", df.info())
     
-    print("\nStatistiche descrittive sul dataset:")
+    print("\nStatistiche descrittive sul dataset pulito:")
     print("\n", df.describe())
 
     # Controllo e visualizzazione della distribuzione delle classi target
-    print("\nNumero di valori per ciascuna classe target:")
+    
+        # Stampa il numero di istanze in ogni classe
     print(df['popularity_class'].value_counts())
 
+    
+        # Istogramma della distribuzione
     df['popularity_class'].value_counts().sort_index().plot(kind='bar')
     plt.xlabel('Classi di Popolarità')
     plt.ylabel('Numero di brani')
@@ -62,10 +69,7 @@ if __name__ == "__main__":
     print("")
 
     # 2 - DIVISIONE IN TRAINING E TEST SET
-    # Divisione 80% training, 20% test
-    # df_train, df_test = train_test_split(
-    #     df, test_size=0.2, random_state=42, stratify=df['popularity_class'])
-    
+    # avvenuta in data_preprocessing
     df_train = pd.read_csv("spotify_dataset_train.csv")
     df_test = pd.read_csv("spotify_dataset_test.csv")
 
@@ -74,9 +78,6 @@ if __name__ == "__main__":
     print(f"Dimensione Test Set: {df_test.shape[0]} entries")
     print("")
     
-    # Separo feature e target
-    features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness']
-    target = 'popularity_class'
 
     # 3 - EDA
     print("\nAnalisi esplorativa dei dati...")
@@ -84,10 +85,6 @@ if __name__ == "__main__":
 
     # Istogrammi delle features musicali
     hist_dataframe(df_train)
-    
-    df_train["duration_ms"].hist()
-    print(df_train["duration_ms"].head())
-    print(df_train["duration_ms"].mean())
 
     # Distribuzione della popolarità
     plot_popularity_distribution(df_train)
@@ -112,119 +109,82 @@ if __name__ == "__main__":
     # Grafico radiale delle features per ogni classe di popolarità
     plot_radar_chart(df_train)
     
+    
     # 4 - FEATURE ENGINEERING
+    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.2, 10)
+
+
+    # 5 - HYPERPARAMETERS TUNING
     
-    # 4 - FEATURE ENGINEERING (Applicato sia a df_train che a df_test)
-    for df in [df_train, df_test]:
-        df["energy_loudness"] = df["energy"] * df["loudness"]
-        df["loudness_valence"] = df["loudness"] * df["valence"]
-        df["danceability_energy"] = df["danceability"] * df["energy"]
-        df["acousticness_speechiness"] = df["acousticness"] * df["speechiness"]
-        df["instr_speech_ratio"] = df["instrumentalness"] / (df["speechiness"] + 1e-5)
-        df["duration_per_bpm"] = df["duration_ms"] / (df["tempo"] + 1e-5)
-        df["vocal_intensity"] = df["loudness"] * df["speechiness"]
-        df["energy_danceability_ratio"] = df["energy"] / (df["danceability"] + 1e-5)
-
-    # 5 - SCALING (Dopo aver aggiunto le nuove feature)
-    features = [
-    'duration_ms', 'explicit', 'speechiness', 'instrumentalness', 
-    'energy', 'danceability', 'valence', 'acousticness',
-    'energy_loudness', 'loudness_valence', 'danceability_energy', 'acousticness_speechiness',
-    'instr_speech_ratio', 'duration_per_bpm', 'vocal_intensity', 'energy_danceability_ratio'
-    ]
-
-    # Separo X e y per il training e test set
-    X_train = df_train[features]
-    y_train = df_train[target]
-    X_test = df_test[features]
-    y_test = df_test[target]
-
-    print("Valori NaN in df_train:")
-    print(df_train.isna().sum())
-
-    print("Valori infiniti in df_train:")
-    print(np.isinf(df_train.select_dtypes(include=[np.number])).sum())
-
-    
-    # Converti gli infiniti in NaN
-    df_train.replace([np.inf, -np.inf], np.nan, inplace=True)
-    df_test.replace([np.inf, -np.inf], np.nan, inplace=True)
-
-    # Sostituisci i NaN con la media della colonna (o un valore fisso)
-    df_train.fillna(df_train.select_dtypes(include=[np.number]).mean(), inplace=True)
-    df_test.fillna(df_test.select_dtypes(include=[np.number]).mean(), inplace=True)
-    
-    print("Valori NaN in df_train:")
-    print(df_train.isna().sum())
-
-    print("Valori infiniti in df_train:")
-    print(np.isinf(df_train.select_dtypes(include=[np.number])).sum())
-
-    
-    # Creo lo scaler, fittato solo sui dati di training
-    scaler = MinMaxScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-
-    # Trasformo il test set con lo stesso scaler (senza rifare il fit)
-    X_test_scaled = scaler.transform(X_test)
-
-    # 5 - TRAINING AND CROSS VALIDATION
-    print("\nInizio training...")
-    
-    # Cross Validation function
-    def evaluate_model(model, X_train, y_train):
-        scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
-        return np.mean(scores), np.std(scores)
-
-    # Addestriamo un modello preliminare per valutare l'importanza delle feature
-    rf_temp = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_temp.fit(X_train, y_train)
-
-    # Selezioniamo le feature più importanti
-    feature_importance = pd.Series(rf_temp.feature_importances_, index=X_train.columns).sort_values(ascending=False)
-    selected_features = feature_importance[:8].index.tolist()  # Prendiamo le prime 8 feature più importanti
-    X_selected = X_train[selected_features]
-
-    print(f"Feature selezionate dopo feature importance: {selected_features}")
-    
-    # Random Forest con GridSearchCV
+    # RANODM FOREST
+    # Definizione dei parametri per Random Forest
     param_grid_rf = {
-    'n_estimators': [100, 300, 500],  # Aumentiamo il numero di alberi
-    'max_depth': [10, 20, 30],  # Proviamo alberi più profondi
-    'min_samples_split': [2, 5, 10]
-    }
-    rf_grid = GridSearchCV(RandomForestClassifier(random_state=42), param_grid_rf, cv=3, n_jobs=-1)
-    rf_grid.fit(X_train, y_train)
-    rf_model = rf_grid.best_estimator_
-    y_pred_rf = rf_model.predict(X_test)
-    print("\nRandom Forest:")
-    print(f"Accuracy: {accuracy_score(y_test, y_pred_rf):.4f}")
-    print(classification_report(y_test, y_pred_rf))
+        'n_estimators': [100, 300, 500],
+        'max_depth': [10, 20, 30],
+        'min_samples_split': [2, 5, 10]
+        }
 
-    # Gradient Boosting con GridSearchCV
-    param_grid_gb = {
-    'n_estimators': [100, 300],
-    'learning_rate': [0.01, 0.1, 0.2],  # Aggiungiamo un learning rate più aggressivo
-    'max_depth': [3, 5, 7]  # Testiamo alberi più profondi
+    # Ottimizzazione Random Forest
+    rf_model = optimize_hyperparameters(RandomForestClassifier(random_state=42), param_grid_rf, X_train, y_train)
+    
+    # LIGHTGBM
+    param_grid_lgb = {
+       'n_estimators': [100, 300],
+       'learning_rate': [0.01, 0.1, 0.2],
+       'max_depth': [3, 5, 7]
     }
-    gb_grid = GridSearchCV(GradientBoostingClassifier(random_state=42), param_grid_gb, cv=3, n_jobs=-1)
-    gb_grid.fit(X_train, y_train)
-    gb_model = gb_grid.best_estimator_
-    y_pred_gb = gb_model.predict(X_test)
-    print("\nGradient Boosting:")
-    print(f"Accuracy: {accuracy_score(y_test, y_pred_gb):.4f}")
-    print(classification_report(y_test, y_pred_gb))
+    lgb_model = optimize_hyperparameters(LGBMClassifier(random_state=42), param_grid_lgb, X_train, y_train)
 
-    #    Support Vector Machine con GridSearchCV
+    # GRADIENT BOOSTING
+    # Definizione dei parametri per Gradient Boosting
+    # param_grid_gb = {
+    #     'n_estimators': [100, 300],
+    #     'learning_rate': [0.01, 0.1, 0.2],
+    #     'max_depth': [3, 5, 7]
+    #     }
+    
+    # # Ottimizzazione Gradient Boosting
+    # gb_model = optimize_hyperparameters(GradientBoostingClassifier(random_state=42), param_grid_gb, X_train, y_train)
+    
+    # SUPPORT VECTOR MACHINE
+    # Definizione dei parametri per SVM
     param_grid_svm = {
-        'C': [0.1, 1, 10],
-        'gamma': ['scale', 'auto'],
-        'kernel': ['rbf', 'linear']
-    }
-    # svm_grid = GridSearchCV(SVC(), param_grid_svm, cv=3, n_jobs=-1)
-    # svm_grid.fit(X_train, y_train)
-    # svm_model = svm_grid.best_estimator_
-    # y_pred_svm = svm_model.predict(X_test)
-    # print("\nSVM:")
-    # print(f"Accuracy: {accuracy_score(y_test, y_pred_svm):.4f}")
-    # print(classification_report(y_test, y_pred_svm))
+        'C': [0.1, 1, 10],  # Controlla la penalità dell'errore
+        'gamma': ['scale', 'auto'],  # Controlla il raggio d'azione del kernel
+        'kernel': ['rbf', 'linear']  # Testiamo kernel diversi
+        }
+
+    # Ottimizzazione SVM
+    svm_model = optimize_hyperparameters(SVC(random_state=42), param_grid_svm, X_train, y_train)
+    
+    
+    # 6 - TESTING
+    print("\n########## RISULTATI TEST SET ##########")
+
+    # Funzione per testare e stampare i risultati
+    def test_model(model, model_name, X_test, y_test):
+   
+        y_pred = model.predict(X_test)
+
+        print(f"\n{model_name}:")
+        print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+        print(classification_report(y_test, y_pred))
+     
+    # Test Light GBM
+    test_model(lgb_model, "LightGBM", X_test, y_test)
+
+    # Test Random Forest
+    test_model(rf_model, "Random Forest", X_test, y_test)
+
+    # Test Gradient Boosting
+    #test_model(gb_model, "Gradient Boosting", X_test, y_test)
+
+    # Test SVM
+    test_model(svm_model, "Support Vector Machine (SVM)", X_test, y_test)
+    
+    
+
+    print("\n########## TEST COMPLETATO ##########")
+
+    
+    

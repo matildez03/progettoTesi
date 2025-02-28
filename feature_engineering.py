@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 
 
 
-def feature_engineering(sample_size, top_n_features):
+def feature_engineering(sample_size=0.1, top_n_features=10):
 
     df_train = pd.read_csv("spotify_dataset_train.csv")
     df_test = pd.read_csv("spotify_dataset_test.csv")
@@ -41,10 +41,8 @@ def feature_engineering(sample_size, top_n_features):
 
     plot_correlation_matrix(df_train)
 
-    # Definiamo le feature e il target
-
+    # Definizione di feature e target
     # Vengono scartate le features con correlazione più bassa: "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm"
-    # Definizione delle feature e del target
     features = ['duration_ms','explicit','speechiness','instrumentalness','energy', 
             'danceability', 'valence', 'acousticness', 'instrumentalness',
             "energy_loudness","loudness_valence","danceability_energy","acousticness_speechiness","vocal_intensity"]
@@ -70,7 +68,7 @@ def feature_engineering(sample_size, top_n_features):
     plt.title("Importanza delle Feature con Random Forest")
     plt.show()
 
-    # **Selezione delle Top N Feature più importanti**
+    # Selezione delle Top N Feature più importanti
     selected_features = feature_importance.nlargest(top_n_features).index.tolist()
     print(f"Feature selezionate: {selected_features}")
     
@@ -79,7 +77,7 @@ def feature_engineering(sample_size, top_n_features):
     X_test_selected = X_test[selected_features]
 
     # FEATURES SCALING
-    # Creo lo scaler, fittato solo sui dati di training
+    # Creazione dello scaler, fittato solo sui dati di training
     scaler = MinMaxScaler()
     X_train_scaled = scaler.fit_transform(X_train_selected)
     X_test_scaled = scaler.transform(X_test_selected)

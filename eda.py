@@ -113,14 +113,14 @@ def plot_radar_chart(df):
     feature_means = df.groupby("popularity_class").mean()
     categories = feature_means.columns
 
-    # Normalizziamo i valori tra 0 e 1 per una migliore visualizzazione
+    # Normalizzazione dei valori tra 0 e 1 per una migliore visualizzazione
     feature_means = (feature_means - feature_means.min()) / (feature_means.max() - feature_means.min())
 
     plt.figure(figsize=(8, 8))
     
     for pop_class in feature_means.index:
         values = feature_means.loc[pop_class].values.flatten().tolist()
-        values += values[:1]  # Chiudiamo il cerchio
+        values += values[:1]  # Chiusura del cerchio
 
         angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
         angles += angles[:1]

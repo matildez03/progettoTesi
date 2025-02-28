@@ -30,16 +30,11 @@ def preprocess_data(file_path):
         pd.DataFrame: DataFrame pulito e con la variabile target aggiunta.
     """
     
-    # Carico il dataset
+    # Caricamento del dataset
     df = pd.read_csv(file_path)
-    print("Prime righe del dataset:")
-    print(df.head())
     
     print("Informazioni sul dataset:")
     print(df.info())
-    
-    print("\nStatistiche descrittive sul dataset:")
-    print("\n", df.describe())
     
     #distribuzione di popolarità
     df["popularity"].hist()
@@ -63,14 +58,10 @@ def preprocess_data(file_path):
     # Creo 4 categorie bilanciate usando i quartili
     df_cleaned['popularity_class'] = pd.qcut(df_cleaned['popularity'], q=4, labels=[1, 2, 3, 4])
     
-    # Stampa il numero di istanze in ogni classe
-    print(df_cleaned['popularity_class'].value_counts())
-
     # Stampa il range di popularity per ogni categoria
     range_by_class = df_cleaned.groupby('popularity_class')['popularity'].agg(['min', 'max'])
     print(range_by_class)
-    
-    
+
     # Salva i file csv del dataset pulito con e senza la popolarità numerica
     df_cleaned.to_csv("spotify_dataset_cleaned_with_popularity.csv", index=False)
     df_cleaned.drop(columns=["popularity","track_id"], inplace=True)
@@ -83,6 +74,7 @@ def preprocess_data(file_path):
     df_test.to_csv("spotify_dataset_test.csv", index=False)
     
     print("train and test csv files created")
+    print("End of data preprocessing")
     return df_cleaned
 
     
