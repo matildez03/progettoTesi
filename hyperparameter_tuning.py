@@ -12,7 +12,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 
 
-def optimize_hyperparameters(model, param_grid, X_train, y_train, sample_size=0.2, cv=5):
+def optimize_hyperparameters(model, param_grid, X_train, y_train, sample_size=0.3, cv=5):
     """
     Esegue GridSearchCV su un sottoinsieme dei dati per selezionare i migliori iperparametri.
     
@@ -20,11 +20,12 @@ def optimize_hyperparameters(model, param_grid, X_train, y_train, sample_size=0.
     :param param_grid: Dizionario dei parametri da testare
     :param X_train: Feature di training complete
     :param y_train: Target di training completo
-    :param sample_size: Percentuale di dati da usare per la ricerca (default: 20%)
-    :param cv: Numero di fold per la cross-validation (default: 3)
+    :param sample_size: Percentuale di dati da usare per la ricerca (default: 30%)
+    :param cv: Numero di fold per la cross-validation (default: 5)
     :return: Il modello ottimizzato con i migliori iperparametri
     """
-
+    print("Inizio dell'ottimizzazione degli iperparametri e del training...")
+    
     # Campiona un sottoinsieme del training set
     X_sample, _, y_sample, _ = train_test_split(X_train, y_train, test_size=(1 - sample_size), stratify=y_train, random_state=42)
     

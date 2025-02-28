@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 
 
 
-def feature_engineering(sample_size=0.1, top_n_features=10):
+def feature_engineering(sample_size=0.2, top_n_features=10):
 
     df_train = pd.read_csv("spotify_dataset_train.csv")
     df_test = pd.read_csv("spotify_dataset_test.csv")
@@ -40,6 +40,8 @@ def feature_engineering(sample_size=0.1, top_n_features=10):
            df["vocal_intensity"] = df["loudness"] * df["speechiness"]   
 
     plot_correlation_matrix(df_train)
+    
+    print(df_train.info())
 
     # Definizione di feature e target
     # Vengono scartate le features con correlazione più bassa: "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm"
