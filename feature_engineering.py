@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 
 
 
-def feature_engineering(sample_size=0.3, top_n_features=14):
+def feature_engineering(sample_size=0.3, top_n_features=13):
 
     df_train = pd.read_csv("spotify_dataset_train.csv")
     df_test = pd.read_csv("spotify_dataset_test.csv")

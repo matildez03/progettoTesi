@@ -21,7 +21,7 @@ from eda import (
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
@@ -96,7 +96,6 @@ if __name__ == "__main__":
     plot_speechiness_vs_popularity(df_train)
     plot_tempo_vs_popularity(df_train)
     plot_instrumentalness_vs_popularity(df_train)
-    plot_danceability_violin(df_train)
     
     plot_energy_vs_valence(df_train)
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
         'n_estimators': [100, 300, 500],
         'max_depth': [10, 20, 30],
         'min_samples_split': [2, 5, 10]
-        }
+    }
 
     # Ottimizzazione Random Forest
     rf_model = optimize_hyperparameters(RandomForestClassifier(random_state=42), param_grid_rf, X_train, y_train)
@@ -152,10 +151,10 @@ if __name__ == "__main__":
     # SUPPORT VECTOR MACHINE
     # Definizione dei parametri per SVM
     param_grid_svm = {
-        'C': [0.1, 1, 10],  # Controlla la penalità dell'errore
-        'gamma': ['scale', 'auto'],  # Controlla il raggio d'azione del kernel
-        'kernel': ['rbf', 'linear']  # Testiamo kernel diversi
-        }
+        'C': [0.1, 1, 10], 
+        'gamma': ['scale', 'auto'], 
+        'kernel': ['rbf', 'poly']  
+    }
 
     # Ottimizzazione SVM
     svm_model = optimize_hyperparameters(SVC(random_state=42), param_grid_svm, X_train, y_train)
@@ -172,6 +171,13 @@ if __name__ == "__main__":
         print(f"\n{model_name}:")
         print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
         print(classification_report(y_test, y_pred))
+        
+        # Creazione e visualizzazione della matrice di confusione
+        cm = confusion_matrix(y_test, y_pred)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+        disp.plot(cmap='Blues')
+        plt.title(f'Matrice di Confusione - {model_name}')
+        plt.show()
      
     # Test Light GBM
     test_model(lgb_model, "LightGBM", X_test, y_test)
