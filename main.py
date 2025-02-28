@@ -111,10 +111,13 @@ if __name__ == "__main__":
     
     
     # 4 - FEATURE ENGINEERING
-    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.2, 10)
+    print("Feature engineering...")
+    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 14)
 
 
     # 5 - HYPERPARAMETERS TUNING
+    print("Inizio dell'ottimizzazione degli iperparametri e del training...")
+
     
     # RANODM FOREST
     # Definizione dei parametri per Random Forest
