@@ -11,6 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
 pd.set_option('display.expand_frame_repr', False)  # Evita che le colonne vadano a capo
@@ -73,7 +75,14 @@ def preprocess_data(file_path):
     df_cleaned.to_csv("spotify_dataset_cleaned_with_popularity.csv", index=False)
     df_cleaned.drop(columns=["popularity","track_id"], inplace=True)
     df_cleaned.to_csv("spotify_dataset_cleaned.csv", index=False)
+
+    # Divisione 80% training, 20% test
+    df_train, df_test = train_test_split(df_cleaned, test_size=0.2, random_state=42, stratify=df_cleaned['popularity_class'])
     
+    df_train.to_csv("spotify_dataset_train.csv", index=False)
+    df_test.to_csv("spotify_dataset_test.csv", index=False)
+    
+    print("train and test csv files created")
     return df_cleaned
 
     

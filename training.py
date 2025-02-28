@@ -12,6 +12,14 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
+from eda import (
+    plot_popularity_distribution, plot_duration_vs_popularity, plot_loudness_vs_popularity,
+    plot_danceability_vs_popularity, plot_speechiness_vs_popularity, plot_tempo_vs_popularity,
+    plot_instrumentalness_vs_popularity, plot_correlation_matrix, hist_dataframe,
+    plot_danceability_violin, plot_energy_vs_valence, plot_feature_heatmap, plot_radar_chart
+)
+from sklearn.preprocessing import MinMaxScaler
+
 
 # Caricamento del dataset pulito
 df = pd.read_csv('spotify_dataset_cleaned.csv')
@@ -19,16 +27,50 @@ df = pd.read_csv('spotify_dataset_cleaned.csv')
 # Selezioniamo un sottoinsieme del dataset per ridurre le dimensioni (es. il 30% dei dati)
 df_reduced = df.sample(frac=0.3, random_state=42)
 
+
+
+#FEATURES ENGINEERING
+
+#rimozione features inutili
+# Matrice di correlazione tra le features e la popolarità
+plot_correlation_matrix(df_reduced)
+
+
+
+# Creare la nuova feature combinata
+df_reduced["energy_loudness"] = df_reduced["energy"] * df_reduced["loudness"]
+df_reduced["loudness_valence"] = df_reduced["loudness"] * df_reduced["valence"]
+df_reduced["danceability_energy"] = df_reduced["danceability"] * df_reduced["energy"]
+df_reduced["acousticness_speechiness"] = df_reduced["acousticness"] * df_reduced["speechiness"]
+df_reduced["speech_instr_ratio"] = df_reduced["speechiness"] / (df_reduced["instrumentalness"] + 1e-5)
+df_reduced["duration_per_bpm"] = df_reduced["duration_ms"] / (df_reduced["tempo"] + 1e-5)
+df_reduced["vocal_intensity"] = df_reduced["loudness"] * df_reduced["speechiness"]
+
+
+# Matrice di correlazione tra le features e la popolarità
+plot_correlation_matrix(df_reduced)
+
 # Definiamo le feature e il target
-features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 'danceability', 'valence', 'acousticness', 'instrumentalness']
+features = ['duration_ms','explicit','mode','speechiness','instrumentalness','liveness','tempo', 'energy', 
+            'danceability', 'valence', 'acousticness', 'instrumentalness',
+            "energy_loudness","loudness_valence","danceability_energy","acousticness_speechiness",
+           "speech_instr_ratio","duration_per_bpm","vocal_intensity"]
 target = 'popularity_class'
 
 X = df_reduced[features]
 y = df_reduced[target]
 
+
 # Suddivisione in training (60%), validation (20%) e test (20%)
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
 X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+
+# Creo lo scaler, fittato solo sui dati di training
+scaler = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+
+# Trasformo il test set con lo stesso scaler (senza rifare il fit)
+X_test_scaled = scaler.transform(X_test)
 
 # Stampa delle dimensioni dei set
 print(f"Training Set: {X_train.shape[0]} samples")

@@ -45,6 +45,9 @@ y_test = df_test[target]
 plot_correlation_matrix(df_train)
 
 #rimozione features inutili
+# Matrice di correlazione tra le features e la popolarità
+plot_correlation_matrix(df_train)
+
 df_train.drop(columns=["mode","key","time_signature","explicit"],inplace=True)
 
 # Creare la nuova feature combinata
@@ -57,6 +60,7 @@ df_train["instr_speech_ratio"] = df_train["instrumentalness"] / (df_train["speec
 df_train["duration_per_bpm"] = df_train["duration_ms"] / df_train["tempo"]
 df_train["vocal_intensity"] = df_train["loudness"] * df_train["speechiness"]
 df_train["energy_danceability_ratio"] = df_train["energy"] / (df_train["danceability"] + 1e-5)
+
 
 
 print(df_train[["instr_speech_ratio", "popularity_class"]].corr())

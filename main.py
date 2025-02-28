@@ -10,7 +10,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from data_preprocessing import preprocess_data
 from eda import (
@@ -64,8 +63,11 @@ if __name__ == "__main__":
 
     # 2 - DIVISIONE IN TRAINING E TEST SET
     # Divisione 80% training, 20% test
-    df_train, df_test = train_test_split(
-        df, test_size=0.2, random_state=42, stratify=df['popularity_class'])
+    # df_train, df_test = train_test_split(
+    #     df, test_size=0.2, random_state=42, stratify=df['popularity_class'])
+    
+    df_train = pd.read_csv("spotify_dataset_train.csv")
+    df_test = pd.read_csv("spotify_dataset_test.csv")
 
     # Controllo delle dimensioni
     print(f"Dimensione Training Set: {df_train.shape[0]} entries")
