@@ -96,7 +96,7 @@ if __name__ == "__main__":
     
     # 4 - FEATURE ENGINEERING
     print("Feature engineering...")
-    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 14)
+    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 13)
 
 
     # 5 - HYPERPARAMETERS TUNING
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     param_grid_rf = {
         'n_estimators': [500, 1000],
         'max_depth': [30, 50],
-        'min_samples_split': [2, 3, 5]
+        'min_samples_split': [2, 5, 10]
     }
 
     # Ottimizzazione Random Forest
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # LIGHTGBM
     param_grid_lgb = {
     'n_estimators': [500, 1000],
-    'learning_rate': [0.001, 0.01],
+    #'learning_rate': [0.001, 0.01],
     'max_depth': [10,30],
     'num_leaves': [31, 128]
     }
@@ -129,7 +129,6 @@ if __name__ == "__main__":
 
     param_grid_svm = {
         'C': [1, 10, 20],  
-        'gamma': ['scale', 'auto'],  
         'kernel': ['rbf', 'linear']  
     }
 
