@@ -136,6 +136,7 @@ def plot_radar_chart(df):
     plt.legend()
     plt.show()
     
+    
 def plot_energy_vs_valence(df):
     """Scatter plot di Energy vs Valence colorato per classe di popolarità."""
     plt.figure(figsize=(12,6))
@@ -144,6 +145,26 @@ def plot_energy_vs_valence(df):
     plt.ylabel("Valenza Emotiva")
     plt.title("Energy vs Valence nei Brani Popolari")
     plt.legend(title="Classe di Popolarità")
+    plt.show()
+
+
+def plot_scatter_by_popularity(df, x_feature='energy', y_feature='danceability'):
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(
+        data=df,
+        x=x_feature,
+        y=y_feature,
+        hue='popularity_class',
+        palette='viridis',
+        alpha=0.7,
+        edgecolor=None
+    )
+    plt.xlabel(x_feature.capitalize())
+    plt.ylabel(y_feature.capitalize())
+    plt.title(f'Distribuzione delle classi di popolarità su {x_feature} e {y_feature}')
+    plt.legend(title='Classe di Popolarità', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 

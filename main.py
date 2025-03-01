@@ -4,33 +4,24 @@
 Created on Sun Feb 16 11:25:00 2025
 
 @author: matildezoccolillo
+
+file da eseguire
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
 from data_preprocessing import preprocess_data
 from eda import (
     plot_popularity_distribution, plot_duration_vs_popularity, plot_loudness_vs_popularity,
     plot_danceability_vs_popularity, plot_speechiness_vs_popularity, plot_tempo_vs_popularity,
     plot_instrumentalness_vs_popularity, plot_correlation_matrix, hist_dataframe,
-    plot_danceability_violin, plot_energy_vs_valence, plot_feature_heatmap, plot_radar_chart
+    plot_energy_vs_valence, plot_feature_heatmap, plot_radar_chart
 )
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from feature_engineering import feature_engineering
 from hyperparameter_tuning import optimize_hyperparameters
 from lightgbm import LGBMClassifier
 from model_test import test_model
-
-
 
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
@@ -56,18 +47,12 @@ if __name__ == "__main__":
     print("\n", df.describe())
 
     # Controllo e visualizzazione della distribuzione delle classi target
-    
         # Stampa il numero di istanze in ogni classe
     print(df['popularity_class'].value_counts())
 
     
         # Istogramma della distribuzione
-    df['popularity_class'].value_counts().sort_index().plot(kind='bar')
-    plt.xlabel('Classi di Popolarità')
-    plt.ylabel('Numero di brani')
-    plt.title('Distribuzione delle Classi di Popolarità')
-    plt.show()
-    print("")
+    plot_popularity_distribution(df)
 
     # 2 - DIVISIONE IN TRAINING E TEST SET
     # avvenuta in data_preprocessing
@@ -98,7 +83,6 @@ if __name__ == "__main__":
     plot_tempo_vs_popularity(df_train)
     plot_instrumentalness_vs_popularity(df_train)
     
-    plot_energy_vs_valence(df_train)
 
     # Matrice di correlazione tra le features e la popolarità
     plot_correlation_matrix(df_train)
@@ -122,9 +106,9 @@ if __name__ == "__main__":
     # RANODM FOREST
     # Definizione dei parametri per Random Forest
     param_grid_rf = {
-        'n_estimators': [100, 300, 500],
-        'max_depth': [10, 20, 30],
-        'min_samples_split': [2, 5, 10]
+        'n_estimators': [500, 1000],
+        'max_depth': [30, 50],
+        'min_samples_split': [2, 3, 5]
     }
 
     # Ottimizzazione Random Forest
@@ -132,30 +116,23 @@ if __name__ == "__main__":
     
     # LIGHTGBM
     param_grid_lgb = {
-       'n_estimators': [100, 300],
-       'learning_rate': [0.01, 0.1, 0.2],
-       'max_depth': [3, 5, 7]
+    'n_estimators': [500, 1000],
+    'learning_rate': [0.001, 0.01],
+    'max_depth': [10,30],
+    'num_leaves': [31, 128]
     }
     lgb_model = optimize_hyperparameters(LGBMClassifier(random_state=42), param_grid_lgb, X_train, y_train)
 
-    # GRADIENT BOOSTING
-    # Definizione dei parametri per Gradient Boosting
-    # param_grid_gb = {
-    #     'n_estimators': [100, 300],
-    #     'learning_rate': [0.01, 0.1, 0.2],
-    #     'max_depth': [3, 5, 7]
-    #     }
-    
-    # # Ottimizzazione Gradient Boosting
-    # gb_model = optimize_hyperparameters(GradientBoostingClassifier(random_state=42), param_grid_gb, X_train, y_train)
     
     # SUPPORT VECTOR MACHINE
     # Definizione dei parametri per SVM
+
     param_grid_svm = {
-        'C': [0.1, 1, 10], 
-        'gamma': ['scale', 'auto'], 
-        'kernel': ['rbf', 'poly']  
+        'C': [1, 10, 20],  
+        'gamma': ['scale', 'auto'],  
+        'kernel': ['rbf', 'linear']  
     }
+
 
     # Ottimizzazione SVM
     svm_model = optimize_hyperparameters(SVC(random_state=42), param_grid_svm, X_train, y_train)
@@ -170,8 +147,6 @@ if __name__ == "__main__":
     # Test Random Forest
     test_model(rf_model, "Random Forest", X_test, y_test)
 
-    # Test Gradient Boosting
-    #test_model(gb_model, "Gradient Boosting", X_test, y_test)
 
     # Test SVM
     test_model(svm_model, "Support Vector Machine (SVM)", X_test, y_test)

@@ -10,9 +10,6 @@ feature engineering file definitivo
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
 from eda import plot_correlation_matrix
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
