@@ -28,6 +28,7 @@ from sklearn.ensemble import RandomForestClassifier
 from feature_engineering import feature_engineering
 from hyperparameter_tuning import optimize_hyperparameters
 from lightgbm import LGBMClassifier
+from model_test import test_model
 
 
 
@@ -162,22 +163,6 @@ if __name__ == "__main__":
     
     # 6 - TESTING
     print("\n########## RISULTATI TEST SET ##########")
-
-    # Funzione per testare e stampare i risultati
-    def test_model(model, model_name, X_test, y_test):
-   
-        y_pred = model.predict(X_test)
-
-        print(f"\n{model_name}:")
-        print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
-        print(classification_report(y_test, y_pred))
-        
-        # Creazione e visualizzazione della matrice di confusione
-        cm = confusion_matrix(y_test, y_pred)
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-        disp.plot(cmap='Blues')
-        plt.title(f'Matrice di Confusione - {model_name}')
-        plt.show()
      
     # Test Light GBM
     test_model(lgb_model, "LightGBM", X_test, y_test)
