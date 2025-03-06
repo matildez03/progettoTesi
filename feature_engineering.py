@@ -16,8 +16,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 
-
-def feature_engineering(sample_size=0.3, top_n_features=13):
+def feature_engineering(sample_size=0.3, top_n_features=21):
 
     df_train = pd.read_csv("spotify_dataset_train.csv")
     df_test = pd.read_csv("spotify_dataset_test.csv")
@@ -43,8 +42,10 @@ def feature_engineering(sample_size=0.3, top_n_features=13):
     # Definizione di feature e target
     # Vengono scartate le features con correlazione più bassa: "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm"
     features = ['duration_ms','explicit','speechiness','instrumentalness','energy', 
-            'danceability', 'valence', 'acousticness', 
-            "energy_loudness","loudness_valence","danceability_energy","acousticness_speechiness","vocal_intensity"]
+            'danceability', 'valence', 'acousticness', 'loudness',
+            "energy_loudness","loudness_valence","danceability_energy","acousticness_speechiness","vocal_intensity",
+           "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm","time_signature"] #riga da rimuovere
+    
 
     target = 'popularity_class'
 

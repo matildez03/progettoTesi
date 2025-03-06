@@ -9,12 +9,13 @@ file da eseguire
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 from data_preprocessing import preprocess_data
 from eda import (
     plot_popularity_distribution, plot_duration_vs_popularity, plot_loudness_vs_popularity,
     plot_danceability_vs_popularity, plot_speechiness_vs_popularity, plot_tempo_vs_popularity,
     plot_instrumentalness_vs_popularity, plot_correlation_matrix, hist_dataframe,
-    plot_energy_vs_valence, plot_feature_heatmap, plot_radar_chart
+    plot_feature_heatmap, plot_radar_chart
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -22,6 +23,8 @@ from feature_engineering import feature_engineering
 from hyperparameter_tuning import optimize_hyperparameters
 from lightgbm import LGBMClassifier
 from model_test import test_model
+from sklearn.model_selection import train_test_split
+
 
 
 pd.set_option('display.max_columns', None)  # Mostra tutte le colonne
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     
     # 4 - FEATURE ENGINEERING
     print("Feature engineering...")
-    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 13)
+    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 21)
 
 
     # 5 - HYPERPARAMETERS TUNING
@@ -107,7 +110,7 @@ if __name__ == "__main__":
     # Definizione dei parametri per Random Forest
     param_grid_rf = {
         'n_estimators': [500, 1000],
-        'max_depth': [30, 50],
+        'max_depth': [30, 50,100],
         'min_samples_split': [2, 5, 10]
     }
 
@@ -117,8 +120,8 @@ if __name__ == "__main__":
     # LIGHTGBM
     param_grid_lgb = {
     'n_estimators': [500, 1000],
-    #'learning_rate': [0.001, 0.01],
-    'max_depth': [10,30],
+    'learning_rate': [0.001, 0.01],
+    'max_depth': [30, 50, 100],
     'num_leaves': [31, 128]
     }
     lgb_model = optimize_hyperparameters(LGBMClassifier(random_state=42), param_grid_lgb, X_train, y_train)
@@ -126,7 +129,6 @@ if __name__ == "__main__":
     
     # SUPPORT VECTOR MACHINE
     # Definizione dei parametri per SVM
-
     param_grid_svm = {
         'C': [1, 10, 20],  
         'kernel': ['rbf', 'linear']  
@@ -138,19 +140,25 @@ if __name__ == "__main__":
     
     
     # 6 - TESTING
-    print("\n########## RISULTATI TEST SET ##########")
+    print("\n########## RISULTATI TEST ##########")
      
     # Test Light GBM
     test_model(lgb_model, "LightGBM", X_test, y_test)
 
     # Test Random Forest
     test_model(rf_model, "Random Forest", X_test, y_test)
-
-
+    
+    print("Importanza delle features nelle previsioni RF:")
+    # Feature Importance con Random Forest
+    feature_importance = pd.Series(rf_model.feature_importances_, index=df_train.columns)
+    feature_importance.sort_values(ascending=False).plot(kind="bar", figsize=(12, 6))
+    plt.title("Importanza delle Feature con Random Forest")
+    plt.show()
+    
     # Test SVM
     test_model(svm_model, "Support Vector Machine (SVM)", X_test, y_test)
     
-    
+
 
     print("\n########## TEST COMPLETATO ##########")
 
