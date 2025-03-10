@@ -99,7 +99,7 @@ if __name__ == "__main__":
     
     # 4 - FEATURE ENGINEERING
     print("Feature engineering...")
-    X_train, y_train, X_test, y_test, scaler = feature_engineering(0.3, 21)
+    X_train, y_train, X_test, y_test, scaler, features = feature_engineering(0.3, 21)
 
 
     # 5 - HYPERPARAMETERS TUNING
@@ -150,13 +150,15 @@ if __name__ == "__main__":
     
     print("Importanza delle features nelle previsioni RF:")
     # Feature Importance con Random Forest
-    feature_importance = pd.Series(rf_model.feature_importances_, index=df_train.columns)
+    feature_importance = pd.Series(rf_model.feature_importances_, index=features)
     feature_importance.sort_values(ascending=False).plot(kind="bar", figsize=(12, 6))
     plt.title("Importanza delle Feature con Random Forest")
     plt.show()
     
     # Test SVM
     test_model(svm_model, "Support Vector Machine (SVM)", X_test, y_test)
+    
+    
     
 
 

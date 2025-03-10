@@ -96,7 +96,7 @@ def feature_engineering(sample_size=0.3, top_n_features=21):
 
 
     # Ritorno dei dataset trasformati
-    return X_train_scaled, y_train, X_test_scaled, y_test, scaler
+    return X_train_scaled, y_train, X_test_scaled, y_test, scaler, features
 
 # Per eseguire lo script direttamente
 if __name__ == "__main__":
