@@ -121,8 +121,8 @@ if __name__ == "__main__":
     param_grid_lgb = {
     'n_estimators': [500, 1000],
     'learning_rate': [0.001, 0.01],
-    'max_depth': [30, 50, 100],
-    'num_leaves': [31, 128]
+    'max_depth': [10, 20, 30],
+    'num_leaves': [15, 31, 128]
     }
     lgb_model = optimize_hyperparameters(LGBMClassifier(random_state=42), param_grid_lgb, X_train, y_train)
 
@@ -141,9 +141,6 @@ if __name__ == "__main__":
     
     # 6 - TESTING
     print("\n########## RISULTATI TEST ##########")
-     
-    # Test Light GBM
-    test_model(lgb_model, "LightGBM", X_test, y_test)
 
     # Test Random Forest
     test_model(rf_model, "Random Forest", X_test, y_test)
@@ -155,11 +152,20 @@ if __name__ == "__main__":
     plt.title("Importanza delle Feature con Random Forest")
     plt.show()
     
+    # Test Light GBM
+    test_model(lgb_model, "LightGBM", X_test, y_test)
+    
+    # # Calcolo dell'importanza delle feature
+    feature_importance = pd.Series(lgb_model.feature_importances_, index=features)
+    # # Ordinamento e visualizzazione con un istogramma
+    feature_importance.sort_values(ascending=False).plot(kind="bar", figsize=(12, 6))
+    plt.title("Importanza delle Feature con LightGBM")
+    plt.show()
+    
+    
     # Test SVM
     test_model(svm_model, "Support Vector Machine (SVM)", X_test, y_test)
-    
-    
-    
+
 
 
     print("\n########## TEST COMPLETATO ##########")
