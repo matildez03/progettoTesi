@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb 28 16:00:24 2025
-
 @author: matildezoccolillo
 
-feature engineering file definitivo
+feature engineering
 """
 
 import pandas as pd
@@ -40,11 +38,10 @@ def feature_engineering(sample_size=0.3, top_n_features=21):
     print(df_train.info())
 
     # Definizione di feature e target
-    # Vengono scartate le features con correlazione più bassa: "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm"
     features = ['duration_ms','explicit','speechiness','instrumentalness','energy', 
             'danceability', 'valence', 'acousticness', 'loudness',
             "energy_loudness","loudness_valence","danceability_energy","acousticness_speechiness","vocal_intensity",
-           "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm","time_signature"] #riga da rimuovere
+           "key","mode","liveness","tempo","speech_instr_ratio","duration_per_bpm","time_signature"]
     
 
     target = 'popularity_class'

@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 16 11:33:28 2025
-
 @author: matildezoccolillo
 """
 
@@ -39,7 +37,7 @@ def preprocess_data(file_path):
 
     # CLEANING 
     df.dropna(inplace=True)
-    df.columns = df.columns.str.strip()  # Rimuove spazi dai nomi delle colonne
+    df.columns = df.columns.str.strip()
     
     # Rimozione di duplicati
     df_cleaned = df.sort_values(by="popularity", ascending=False).drop_duplicates(subset="track_id", keep="first")

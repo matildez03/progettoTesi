@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 16 11:25:00 2025
-
 @author: matildezoccolillo
 
 file da eseguire
@@ -131,7 +129,7 @@ if __name__ == "__main__":
     # Definizione dei parametri per SVM
     param_grid_svm = {
         'C': [1, 10, 20],  
-        'kernel': ['rbf', 'linear']  
+        'kernel': ['rbf', 'poly', 'linear']  
     }
 
 

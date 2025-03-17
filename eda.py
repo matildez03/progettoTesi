@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 16 12:11:56 2025
-
 @author: matildezoccolillo
+
+funzioni per l'EDA
 """
 
 import matplotlib.pyplot as plt

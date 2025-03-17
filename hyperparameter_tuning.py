@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb 28 17:07:08 2025
-
 @author: matildezoccolillo
 
 selezione degli iperparametri

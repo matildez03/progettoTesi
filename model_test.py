@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Mar  1 10:22:01 2025
-
 @author: matildezoccolillo
 
 funzione per il testing
